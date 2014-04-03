@@ -13,6 +13,8 @@ package gaul.psychoanalytix.algorithms;
 abstract class AlgorithmList {
 
     static Algorithm[] getAll() {
-        return new Algorithm[]{new MedianAbsoluteDeviation(), new Grubbs()};
+        return new Algorithm[]{new MedianAbsoluteDeviation(), 
+            new Grubbs(), 
+            new StdDevFromAvg()};
     }
 }

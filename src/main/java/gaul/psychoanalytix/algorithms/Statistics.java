@@ -44,4 +44,15 @@ abstract class Statistics {
         }
         return Math.sqrt(total / (values.length - 1));
     }
+    
+    static double tailAvg(double[] values) {
+        if (values.length < 3) {
+            return 0;
+        }
+        double sum = 0;
+        for (int i = 1; i <= 3; i++) {
+            sum += values[values.length - i];
+        }
+        return sum / 3;
+    }
 }
