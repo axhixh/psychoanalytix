@@ -1,4 +1,3 @@
-
 package gaul.psychoanalytix.cacofonix;
 
 import gaul.psychoanalytix.Metric;
@@ -15,27 +14,30 @@ import org.apache.logging.log4j.Logger;
  * @author ashish
  */
 public class Cacofonix {
+
     private static final Logger logger = LogManager.getLogger("psychoanalytix.cacofonix");
     private final String url;
-    
+
     public Cacofonix(String url) {
         logger.info("Connecting to Cacofonix server at " + url);
         this.url = url;
     }
-    
+
     public Collection<Metric> getMetrics() {
         Collection<String> ignoredMetrics = Collections.emptySet();
         return getMetrics(ignoredMetrics);
     }
-    
+
     public Collection<Metric> getMetrics(Collection<String> ignored) {
-        
+
         String metricsUrl = url + "/api/metrics/";
         try {
             String content = HttpUtil.get(metricsUrl);
-            String[] metricNames = content.split("\n");
-            List<Metric> metrics = new ArrayList<>(metricNames.length);
-            for (String name : metricNames) {
+            String[] lines = content.split("\n");
+            List<Metric> metrics = new ArrayList<>(lines.length);
+            for (String line : lines) {
+                String[] parts = content.split("\t");
+                String name = parts[0];
                 if (isIgnored(name, ignored)) {
                     continue;
                 }
@@ -48,15 +50,15 @@ public class Cacofonix {
             return Collections.emptyList();
         }
     }
-    
+
     private boolean isIgnored(String name, Collection<String> ignored) {
         return ignored.contains(name); // TODO do regex match
     }
-    
+
     private Metric load(String name) {
         long end = System.currentTimeMillis();
         long start = end - 30 * 24 * 60 * 60 * 1000L;
-        String dataUrl = String.format("%s/api/metrics/%s?start=%d&end=%d", 
+        String dataUrl = String.format("%s/api/metrics/%s?start=%d&end=%d",
                 url, HttpUtil.escape(name), start, end);
         try {
             String data = HttpUtil.get(dataUrl);
@@ -73,9 +75,9 @@ public class Cacofonix {
                         values[count] = v;
                         times[count] = t;
                         count++;
-                        
+
                     } catch (NumberFormatException err) {
-                        
+
                     }
                 }
             }
@@ -86,7 +88,7 @@ public class Cacofonix {
             System.arraycopy(values, 0, v, 0, count);
             long[] t = new long[count];
             System.arraycopy(times, 0, t, 0, count);
-            
+
             return new Metric(name, t, v);
         } catch (IOException err) {
             logger.warn("Unable to get data points for the metric {}", name);
@@ -94,4 +96,3 @@ public class Cacofonix {
         }
     }
 }
- 
